@@ -1,0 +1,55 @@
+// protoc -I ./protos/ ./protos/chat.proto --go_out=plugins=grpc:protos
+
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "protos";
+
+service RegisterUser {
+  rpc Register(RegisterRequest) returns (User);
+  rpc List(Empty) returns (UserList);
+  rpc SendDirectMessage(NewMessage) returns (DirectMessage);
+  rpc GetUpdates(SubscriptionRequest) returns (stream ServerUpdate);
+  rpc Deregister(Empty) returns (Empty);
+}
+
+message Empty {}
+
+message UserList {
+  repeated User users = 1;
+}
+
+message RegisterRequest {
+  string Username = 1;
+}
+
+message User {
+  string Id = 1;
+  string Username = 2;
+}
+
+message NewMessage {
+  string ReceiverId = 1;
+  string Message = 2;
+}
+
+message DirectMessage {
+  string SenderId = 1;
+  string Message = 2;
+  google.protobuf.Timestamp Time = 3;
+}
+
+message SubscriptionRequest {
+}
+
+message UserStatusChange {
+  User Changed = 1;
+  bool Add = 2;
+}
+
+message ServerUpdate {
+  oneof content {
+      DirectMessage incoming_message = 1;
+      UserStatusChange user_online_status = 2;
+  }
+}
